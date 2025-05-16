@@ -1,13 +1,3 @@
-from flask import Flask, request, jsonify, render_template
-import requests
-import json
-
-app = Flask(__name__)
-logs = []
-
-OPENAI_TOKEN = "sk-proj-..."  # substitua pelo seu
-DIGISAC_TOKEN = "seu_token_digisac"
-
 @app.route('/webhook', methods=['POST'])
 def webhook():
     try:
@@ -15,6 +5,7 @@ def webhook():
         text = payload["data"]["message"]["text"]
         contact_id = payload["data"]["contactId"]
 
+        # Enviar para OpenAI
         resposta = requests.post(
             "https://api.openai.com/v1/chat/completions",
             headers={
@@ -31,6 +22,7 @@ def webhook():
             }
         ).json()["choices"][0]["message"]["content"]
 
+        # Enviar para Digisac
         requests.post(
             "https://bsantos.digisac.biz/api/v1/messages",
             headers={
@@ -45,21 +37,20 @@ def webhook():
             }
         )
 
+        # Armazenar no log
         logs.append({"texto": text, "resposta": resposta})
         if len(logs) > 20:
             logs.pop(0)
 
-        return jsonify({"status": "ok", "resposta": resposta}), 200
+        return jsonify({
+            "status": "ok",
+            "entrada": text,
+            "resposta": resposta,
+            "logs": logs[-10:]  # últimos 10 logs
+        }), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/monitor')
-def monitor():
-    return jsonify(logs[-10:])
-
-@app.route('/painel')
-def painel():
-    return render_template("painel.html")
 
 
