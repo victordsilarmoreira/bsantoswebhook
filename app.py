@@ -5,57 +5,61 @@ import json
 app = Flask(__name__)
 
 # Tokens
+OPENAI_TOKEN = "Bearer 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"
 DIGISAC_TOKEN = "Bearer fdb36d7ef9c813c6516ff7fae664a529199b4311"
-OPENAI_TOKEN = "Bearer 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" 
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
     try:
-        # Etapa 1: Receber o corpo bruto da requisição
-        raw_data = request.data.decode("utf-8")
-        payload = json.loads(raw_data)
-        print("📩 Webhook recebido com sucesso.")
-        print("📨 Payload:", json.dumps(payload, indent=2))
+        # Lê o JSON bruto
+        payload = json.loads(request.data.decode("utf-8"))
+        print("📩 Webhook recebido")
 
-        # Etapa 2: Tentar extrair mensagem_id e contact_id com segurança
-        try:
-            mensagem_id = payload.get("data", {}).get("message", {}).get("id")
-            print(f"🔍 mensagem_id: {mensagem_id}")
-            contact_id = payload.get("data", {}).get("contactId")
-            print(f"👤 contact_id: {contact_id}")    
-            if not mensagem_id or not contact_id:
-                print("⚠️ ID da mensagem ou contactId ausente.")
-                return jsonify({"erro": "mensagem_id ou contact_id não encontrado"}), 400
+        # Extrai o texto e o contactId diretamente
+        text = payload["data"]["message"]["text"]
+        contact_id = payload["data"]["contactId"]
+        print(f"💬 Texto: {text}")
+        print(f"👤 contactId: {contact_id}")
 
-            print(f"🔍 ID da mensagem: {mensagem_id}")
-            print(f"👤 Contact ID: {contact_id}")
-        except Exception as e:
-            print("❌ Erro ao extrair dados do webhook:", str(e))
-            return jsonify({"erro": "Falha ao extrair dados do webhook", "detalhe": str(e)}), 400
+        # Envia texto para OpenAI
+        openai_url = "https://api.openai.com/v1/chat/completions"
+        openai_headers = {
+            "Authorization": f"Bearer {OPENAI_TOKEN}",
+            "Content-Type": "application/json"
+        }
+        openai_payload = {
+            "model": "gpt-4o",
+            "messages": [
+                {"role": "system", "content": "Você é um atendente simpático do outlet Só Marcas."},
+                {"role": "user", "content": text}
+            ],
+            "temperature": 0.7
+        }
 
-        # Etapa 3: Buscar texto da mensagem original no Digisac
-        print("📡 Buscando mensagem original no Digisac...")
-        digisac_url = f"https://bsantos.digisac.biz/api/v1/messages?where[id]={mensagem_id}"
-        headers_digisac = {
+        response_openai = requests.post(openai_url, headers=openai_headers, json=openai_payload)
+        response_openai.raise_for_status()
+        resposta = response_openai.json()["choices"][0]["message"]["content"]
+        print(f"✅ Resposta do ChatGPT: {resposta}")
+
+        # Envia resposta ao Digisac
+        digisac_url = "https://bsantos.digisac.biz/api/v1/messages"
+        digisac_headers = {
             "Authorization": f"Bearer {DIGISAC_TOKEN}",
             "Content-Type": "application/json"
         }
-        r_digisac = requests.get(digisac_url, headers=headers_digisac)
-        r_digisac.raise_for_status()
-        resposta_json = r_digisac.json()
-        print("📦 Resposta da API Digisac:", json.dumps(resposta_json, indent=2))
+        mensagem_payload = {
+            "text": resposta,
+            "type": "chat",
+            "contactId": contact_id,
+            "origin": "bot"
+        }
 
-        mensagem = resposta_json["data"][0]
-        texto = mensagem.get("text", "")
+        response_digisac = requests.post(digisac_url, headers=digisac_headers, json=mensagem_payload)
+        response_digisac.raise_for_status()
+        print("📤 Resposta enviada ao Digisac com sucesso!")
 
-        if not texto:
-            print("⚠️ A mensagem não contém texto.")
-            return jsonify({"error": "Mensagem sem texto"}), 400
-
-        print(f"💬 Texto da mensagem: {texto}")
-
-        # Etapa 4: Enviar texto ao
+        return jsonify({"status": "ok", "resposta": resposta}), 200
 
     except Exception as e:
-        print("❌ Erro durante o processo:", str(e))
-        return jsonify({"error": "Falha no processamento", "detalhe": str(e)}), 500
+        print("❌ Erro no processamento:", str(e))
+        return jsonify({"error": str(e)}), 500
