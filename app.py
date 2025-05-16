@@ -5,8 +5,8 @@ import json
 app = Flask(__name__)
 
 # Tokens
-OPENAI_TOKEN = "Bearer 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"
-DIGISAC_TOKEN = "Bearer fdb36d7ef9c813c6516ff7fae664a529199b4311"
+OPENAI_TOKEN = "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"
+DIGISAC_TOKEN = "fdb36d7ef9c813c6516ff7fae664a529199b4311"
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
