@@ -1,3 +1,10 @@
+import sys
+
+try:
+    print("✅ Inicializando Flask App")
+except Exception as e:
+    print("❌ Erro ao iniciar app:", str(e), file=sys.stderr)
+
 @app.route('/webhook', methods=['POST'])
 def webhook():
     try:
