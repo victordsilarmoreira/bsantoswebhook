@@ -1,26 +1,14 @@
 from flask import Flask, request, jsonify
-import requests
-
-app = Flask(__name__)
-
-# Tokens
-SECRET_TOKEN = "meu-token-superseguro-123"
-DIGISAC_TOKEN = "fdb36d7ef9c813c6516ff7fae664a529199b4311"
-OPENAI_TOKEN = "sk-proj-..."  # substitua pelo seu completo
+import json
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    
-
     try:
-       from flask import json
+        # 👇 Tenta ler o corpo bruto da requisição
+        raw_data = request.data.decode('utf-8')
+        payload = json.loads(raw_data)
 
-try:
-    payload = request.get_json(force=True)
-except Exception as e:
-    return jsonify({"error": "Requisição inválida", "detalhe": str(e)}), 400
-
-        print("📩 Webhook recebido:", payload)
+        print("📩 Webhook recebido (raw):", payload)
 
         # 🟢 Extrair dados básicos
         mensagem_id = payload["data"]["message"]["id"]
