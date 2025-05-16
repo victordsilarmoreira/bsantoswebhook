@@ -67,3 +67,5 @@ def painel():
     return render_template("painel.html")
 print("✅ Flask app iniciado. Rotas disponíveis:")
 print(app.url_map)
+print("🚀 Deploy atualizado — verificação de rota /painel")
+
