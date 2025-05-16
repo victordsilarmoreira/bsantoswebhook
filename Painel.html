@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Painel de Monitoramento</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    pre { background: #f0f0f0; padding: 10px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h2>Últimas mensagens recebidas</h2>
+  <div id="log">Carregando...</div>
+
+  <script src="{{ url_for('static', filename='js/painel.js') }}"></script>
+</body>
+</html>
