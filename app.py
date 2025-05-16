@@ -10,9 +10,7 @@ OPENAI_TOKEN = "sk-proj-..."  # substitua pelo seu completo
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    auth = request.headers.get('Authorization')
-    if auth != f"Bearer {SECRET_TOKEN}":
-        return jsonify({"error": "Unauthorized"}), 401
+    
 
     try:
         payload = request.json
