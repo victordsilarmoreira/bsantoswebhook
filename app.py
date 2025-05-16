@@ -1,12 +1,12 @@
-from flask import Flask, request, jsonify
+rfrom flask import Flask, request, jsonify
 import requests
 import json
 
 app = Flask(__name__)
 
 # Tokens
-DIGISAC_TOKEN = "fdb36d7ef9c813c6516ff7fae664a529199b4311"
-OPENAI_TOKEN = "sk-proj-..."  # substitua pelo token completo
+DIGISAC_TOKEN = "Bearer fdb36d7ef9c813c6516ff7fae664a529199b4311"
+OPENAI_TOKEN = "BBearer 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"
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
