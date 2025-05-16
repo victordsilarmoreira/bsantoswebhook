@@ -20,9 +20,9 @@ def webhook():
         # Etapa 2: Tentar extrair mensagem_id e contact_id com segurança
         try:
             mensagem_id = payload.get("data", {}).get("message", {}).get("id")
+            print(f"🔍 mensagem_id: {mensagem_id}")
             contact_id = payload.get("data", {}).get("contactId")
-print(f"🔍 mensagem_id: {mensagem_id}")
-    print(f"👤 contact_id: {contact_id}")
+            print(f"👤 contact_id: {contact_id}")    
             if not mensagem_id or not contact_id:
                 print("⚠️ ID da mensagem ou contactId ausente.")
                 return jsonify({"erro": "mensagem_id ou contact_id não encontrado"}), 400
