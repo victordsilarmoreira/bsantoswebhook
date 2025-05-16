@@ -13,7 +13,13 @@ def webhook():
     
 
     try:
-        payload = request.json
+       from flask import json
+
+try:
+    payload = request.get_json(force=True)
+except Exception as e:
+    return jsonify({"error": "Requisição inválida", "detalhe": str(e)}), 400
+
         print("📩 Webhook recebido:", payload)
 
         # 🟢 Extrair dados básicos
