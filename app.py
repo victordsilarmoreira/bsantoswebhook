@@ -5,9 +5,8 @@ import json
 app = Flask(__name__)
 logs = []
 
-# Seus tokens
-OPENAI_TOKEN = "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"
-DIGISAC_TOKEN = "fdb36d7ef9c813c6516ff7fae664a529199b4311"
+OPENAI_TOKEN = "sk-proj-..."  # substitua pelo seu
+DIGISAC_TOKEN = "seu_token_digisac"
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
@@ -16,7 +15,6 @@ def webhook():
         text = payload["data"]["message"]["text"]
         contact_id = payload["data"]["contactId"]
 
-        # Enviar para OpenAI
         resposta = requests.post(
             "https://api.openai.com/v1/chat/completions",
             headers={
@@ -33,7 +31,6 @@ def webhook():
             }
         ).json()["choices"][0]["message"]["content"]
 
-        # Enviar para Digisac
         requests.post(
             "https://bsantos.digisac.biz/api/v1/messages",
             headers={
@@ -48,7 +45,6 @@ def webhook():
             }
         )
 
-        # Log local para monitoramento
         logs.append({"texto": text, "resposta": resposta})
         if len(logs) > 20:
             logs.pop(0)
@@ -65,7 +61,5 @@ def monitor():
 @app.route('/painel')
 def painel():
     return render_template("painel.html")
-print("✅ Flask app iniciado. Rotas disponíveis:")
-print(app.url_map)
-print("🚀 Deploy atualizado — verificação de rota /painel")
+
 
